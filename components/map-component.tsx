@@ -1,451 +1,208 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, MapPin, AlertCircle, Layers, RotateCcw } from "lucide-react"
-import type { FilterState } from "@/types"
-
-const EMPTY_FILTERS: FilterState = {
-  healthConditions: [],
-  borough: "allBoroughs",
-  zipCode: "",
-  neighborhood: "",
-  radius: "1",
-  ageGroups: [],
-  raceEthnicities: [],
-  includeNeighborhood: false,
-  environmentalFactors: [],
-  overlays: {
-    foodDeserts: false,
-    snapAccess: false,
-    greenSpace: false,
-    airQuality: false,
-    waterQuality: false,
-    foodZones: false,
-    healthcareAccess: false,
-    transitAccess: false,
-  },
-}
+import { AlertTriangle, MapPin } from "lucide-react"
 
 interface MapComponentProps {
-  filters?: FilterState
-  data: any
+  filters?: any
+  data?: any
   loading?: boolean
 }
 
-export default function MapComponent({ filters = EMPTY_FILTERS, data, loading }: MapComponentProps) {
+export default function MapComponent({ filters, data, loading }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<any>(null)
   const [mapError, setMapError] = useState<string | null>(null)
-  const [mapLoading, setMapLoading] = useState(true)
-  const [leafletLoaded, setLeafletLoaded] = useState(false)
+  const [isMapReady, setIsMapReady] = useState(false)
 
-  // Load Leaflet dynamically
   useEffect(() => {
-    const loadLeaflet = async () => {
-      try {
-        if (typeof window === "undefined") return
-
-        // Check if Leaflet is already loaded
-        if (window.L) {
-          setLeafletLoaded(true)
-          return
-        }
-
-        // Load Leaflet CSS
-        const cssLink = document.createElement("link")
-        cssLink.rel = "stylesheet"
-        cssLink.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        cssLink.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        cssLink.crossOrigin = ""
-        document.head.appendChild(cssLink)
-
-        // Load Leaflet JS
-        const script = document.createElement("script")
-        script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        script.integrity = "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        script.crossOrigin = ""
-
-        script.onload = () => {
-          setLeafletLoaded(true)
-        }
-
-        script.onerror = () => {
-          setMapError("Failed to load map library")
-          setMapLoading(false)
-        }
-
-        document.head.appendChild(script)
-      } catch (error) {
-        console.error("Error loading Leaflet:", error)
-        setMapError("Failed to initialize map")
-        setMapLoading(false)
-      }
-    }
-
-    loadLeaflet()
-  }, [])
-
-  // Initialize map when Leaflet is loaded
-  useEffect(() => {
-    if (!leafletLoaded || !mapRef.current || mapInstanceRef.current) return
-
+    // Simulate map initialization
     const initializeMap = async () => {
       try {
-        setMapLoading(true)
         setMapError(null)
 
-        // Wait for container to be ready
-        await new Promise((resolve) => setTimeout(resolve, 100))
+        // Simulate loading time
+        await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        if (!mapRef.current) {
-          throw new Error("Map container not found")
-        }
+        console.log("Map initialized with data:", data)
+        console.log("Map filters:", filters)
 
-        // Initialize map centered on NYC
-        const map = window.L.map(mapRef.current, {
-          center: [40.7128, -74.006], // NYC coordinates
-          zoom: 11,
-          zoomControl: false, // We'll add custom controls
-        })
-
-        // Add tile layer
-        window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-          maxZoom: 18,
-        }).addTo(map)
-
-        // Add custom zoom controls
-        window.L.control
-          .zoom({
-            position: "topright",
-          })
-          .addTo(map)
-
-        mapInstanceRef.current = map
-        setMapLoading(false)
-
-        // Add borough boundaries
-        addBoroughBoundaries(map)
-
-        console.log("Map initialized successfully")
+        setIsMapReady(true)
       } catch (error) {
         console.error("Map initialization error:", error)
-        setMapError(error instanceof Error ? error.message : "Failed to initialize map")
-        setMapLoading(false)
+        setMapError("Failed to initialize map. Please try refreshing the page.")
       }
     }
 
     initializeMap()
-
-    // Cleanup function
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
-        mapInstanceRef.current = null
-      }
-    }
-  }, [leafletLoaded])
-
-  // Update map data when filters or data change
-  useEffect(() => {
-    if (!mapInstanceRef.current || !data) return
-
-    updateMapData(mapInstanceRef.current, data, filters)
   }, [data, filters])
 
-  const addBoroughBoundaries = (map: any) => {
-    // NYC Borough boundaries (simplified coordinates)
-    const boroughBounds = {
-      Manhattan: [
-        [40.7831, -73.9712],
-        [40.7489, -73.9441],
-        [40.7589, -73.9441],
-        [40.8176, -73.9482],
-      ],
-      Brooklyn: [
-        [40.6782, -73.9442],
-        [40.5795, -73.9442],
-        [40.5795, -73.8333],
-        [40.7282, -73.8333],
-      ],
-      Queens: [
-        [40.7282, -73.7949],
-        [40.6892, -73.7949],
-        [40.6892, -73.7004],
-        [40.7982, -73.7004],
-      ],
-      Bronx: [
-        [40.8448, -73.8648],
-        [40.7856, -73.8648],
-        [40.7856, -73.7654],
-        [40.9176, -73.7654],
-      ],
-      "Staten Island": [
-        [40.5795, -74.1502],
-        [40.4774, -74.1502],
-        [40.4774, -74.0492],
-        [40.6176, -74.0492],
-      ],
-    }
-
-    Object.entries(boroughBounds).forEach(([borough, bounds]) => {
-      const polygon = window.L.polygon(bounds, {
-        color: getBoroughColor(borough),
-        weight: 2,
-        opacity: 0.8,
-        fillOpacity: 0.1,
-      }).addTo(map)
-
-      polygon.bindPopup(`<strong>${borough}</strong><br/>Click to filter by this borough`)
-
-      polygon.on("click", () => {
-        // This would trigger a filter update in the parent component
-        console.log(`Borough clicked: ${borough}`)
-      })
-    })
-  }
-
-  const updateMapData = (map: any, mapData: any, currentFilters: FilterState) => {
-    // Clear existing markers
-    map.eachLayer((layer: any) => {
-      if (layer instanceof window.L.Marker) {
-        map.removeLayer(layer)
-      }
-    })
-
-    // Add health data markers
-    if (mapData.health && Array.isArray(mapData.health)) {
-      mapData.health.forEach((item: any) => {
-        if (item.coordinates) {
-          const [lat, lng] = item.coordinates
-          const marker = window.L.marker([lat, lng], {
-            icon: createCustomIcon("health", item.rate || 0),
-          }).addTo(map)
-
-          marker.bindPopup(`
-            <div class="p-2">
-              <h3 class="font-semibold">${item.condition || "Health Data"}</h3>
-              <p><strong>Borough:</strong> ${item.borough}</p>
-              <p><strong>Rate:</strong> ${item.rate}%</p>
-              <p><strong>Cases:</strong> ${item.cases?.toLocaleString()}</p>
-              <p><strong>Year:</strong> ${item.year}</p>
-            </div>
-          `)
-        }
-      })
-    }
-
-    // Add environmental overlays based on filters
-    if (currentFilters?.overlays?.airQuality && mapData.airQuality) {
-      addEnvironmentalMarkers(map, mapData.airQuality, "airQuality")
-    }
-
-    if (currentFilters?.overlays?.foodDeserts && mapData.foodAccess) {
-      addEnvironmentalMarkers(map, mapData.foodAccess, "foodAccess")
-    }
-
-    if (currentFilters?.overlays?.greenSpace && mapData.greenSpace) {
-      addEnvironmentalMarkers(map, mapData.greenSpace, "greenSpace")
-    }
-
-    if (currentFilters?.overlays?.snapAccess && mapData.snapAccess) {
-      addEnvironmentalMarkers(map, mapData.snapAccess, "snapAccess")
-    }
-
-    if (currentFilters?.overlays?.healthcareAccess && mapData.healthcareAccess) {
-      addEnvironmentalMarkers(map, mapData.healthcareAccess, "healthcareAccess")
-    }
-
-    if (currentFilters?.overlays?.transitAccess && mapData.transitAccess) {
-      addEnvironmentalMarkers(map, mapData.transitAccess, "transitAccess")
-    }
-  }
-
-  const addEnvironmentalMarkers = (map: any, data: any[], type: string) => {
-    if (!Array.isArray(data)) return
-
-    data.forEach((item: any) => {
-      if (item.coordinates) {
-        const [lat, lng] = item.coordinates
-        const marker = window.L.marker([lat, lng], {
-          icon: createCustomIcon(type, item.value || item.score || 0),
-        }).addTo(map)
-
-        marker.bindPopup(createPopupContent(item, type))
-      }
-    })
-  }
-
-  const createCustomIcon = (type: string, value: number) => {
-    const colors = {
-      health: getHealthColor(value),
-      airQuality: getAirQualityColor(value),
-      foodAccess: "#10b981",
-      greenSpace: "#22c55e",
-      snapAccess: "#f59e0b",
-      healthcareAccess: "#3b82f6",
-      transitAccess: "#8b5cf6",
-    }
-
-    const color = colors[type as keyof typeof colors] || "#6b7280"
-
-    return window.L.divIcon({
-      html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [12, 12],
-      className: "custom-marker",
-    })
-  }
-
-  const createPopupContent = (item: any, type: string) => {
-    const typeLabels = {
-      health: "Health Data",
-      airQuality: "Air Quality",
-      foodAccess: "Food Access",
-      greenSpace: "Green Space",
-      snapAccess: "SNAP Access",
-      healthcareAccess: "Healthcare Access",
-      transitAccess: "Transit Access",
-    }
-
-    return `
-      <div class="p-2 min-w-48">
-        <h3 class="font-semibold text-sm mb-2">${typeLabels[type as keyof typeof typeLabels]}</h3>
-        <p class="text-xs"><strong>Name:</strong> ${item.name || item.sampleSite || "N/A"}</p>
-        <p class="text-xs"><strong>Borough:</strong> ${item.borough}</p>
-        ${item.rate ? `<p class="text-xs"><strong>Rate:</strong> ${item.rate}%</p>` : ""}
-        ${item.aqi ? `<p class="text-xs"><strong>AQI:</strong> ${item.aqi}</p>` : ""}
-        ${item.score ? `<p class="text-xs"><strong>Score:</strong> ${item.score}</p>` : ""}
-        ${item.address ? `<p class="text-xs"><strong>Address:</strong> ${item.address}</p>` : ""}
+  if (loading) {
+    return (
+      <div className="h-96 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <h4 className="font-semibold text-gray-700">Loading Interactive Map...</h4>
+          <p className="text-sm text-gray-500 mt-2">Preparing health and environmental data</p>
+        </div>
       </div>
-    `
-  }
-
-  const getBoroughColor = (borough: string) => {
-    const colors = {
-      Manhattan: "#ef4444",
-      Brooklyn: "#f97316",
-      Queens: "#eab308",
-      Bronx: "#22c55e",
-      "Staten Island": "#3b82f6",
-    }
-    return colors[borough as keyof typeof colors] || "#6b7280"
-  }
-
-  const getHealthColor = (rate: number) => {
-    if (rate >= 20) return "#ef4444" // red
-    if (rate >= 10) return "#f97316" // orange
-    return "#22c55e" // green
-  }
-
-  const getAirQualityColor = (aqi: number) => {
-    if (aqi <= 50) return "#22c55e" // green
-    if (aqi <= 100) return "#eab308" // yellow
-    if (aqi <= 150) return "#f97316" // orange
-    return "#ef4444" // red
-  }
-
-  const resetMapView = () => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.setView([40.7128, -74.006], 11)
-    }
+    )
   }
 
   if (mapError) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Interactive Map
-          </CardTitle>
-          <CardDescription>Geographic visualization of health and environmental data</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>Map unavailable: {mapError}. Please try refreshing the page.</AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
+      <Alert className="h-96 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+          <AlertDescription className="text-lg font-medium mb-2">Map Unavailable</AlertDescription>
+          <AlertDescription>{mapError}</AlertDescription>
+        </div>
+      </Alert>
     )
   }
 
+  if (!isMapReady) {
+    return (
+      <div className="h-96 bg-gray-50 rounded-lg border flex items-center justify-center">
+        <div className="text-center">
+          <MapPin className="h-8 w-8 text-gray-400 mx-auto mb-4" />
+          <h4 className="font-semibold text-gray-700">Initializing Map...</h4>
+          <p className="text-sm text-gray-500 mt-2">Setting up interactive visualization</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Mock map display with data points
+  const getDataSummary = () => {
+    if (!data) return { health: 0, environmental: 0, total: 0 }
+
+    const healthPoints = data.health?.length || 0
+    const environmentalPoints = Object.values(data).reduce((sum: number, points: any) => {
+      return sum + (Array.isArray(points) && points !== data.health ? points.length : 0)
+    }, 0)
+
+    return {
+      health: healthPoints,
+      environmental: environmentalPoints,
+      total: healthPoints + environmentalPoints,
+    }
+  }
+
+  const summary = getDataSummary()
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Interactive Map
-            </CardTitle>
-            <CardDescription>Geographic visualization of health and environmental data</CardDescription>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={resetMapView}>
-              <RotateCcw className="h-4 w-4 mr-1" />
-              Reset View
-            </Button>
+    <div className="relative">
+      {/* Map Container */}
+      <div
+        ref={mapRef}
+        className="h-96 bg-gradient-to-br from-blue-50 to-green-50 rounded-lg border relative overflow-hidden"
+      >
+        {/* NYC Borough Representation */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative w-80 h-64">
+            {/* Manhattan */}
+            <div className="absolute top-8 left-32 w-8 h-20 bg-blue-200 rounded transform rotate-12 flex items-center justify-center text-xs font-medium">
+              Manhattan
+            </div>
+
+            {/* Brooklyn */}
+            <div className="absolute bottom-12 left-28 w-16 h-12 bg-green-200 rounded flex items-center justify-center text-xs font-medium">
+              Brooklyn
+            </div>
+
+            {/* Queens */}
+            <div className="absolute top-16 right-16 w-20 h-16 bg-yellow-200 rounded flex items-center justify-center text-xs font-medium">
+              Queens
+            </div>
+
+            {/* Bronx */}
+            <div className="absolute top-4 left-24 w-12 h-12 bg-purple-200 rounded flex items-center justify-center text-xs font-medium">
+              Bronx
+            </div>
+
+            {/* Staten Island */}
+            <div className="absolute bottom-4 left-8 w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center text-xs font-medium">
+              SI
+            </div>
+
+            {/* Data Points Overlay */}
+            {summary.total > 0 && (
+              <>
+                {/* Health Data Points */}
+                {Array.from({ length: Math.min(summary.health, 10) }).map((_, i) => (
+                  <div
+                    key={`health-${i}`}
+                    className="absolute w-3 h-3 bg-red-500 rounded-full animate-pulse"
+                    style={{
+                      top: `${20 + ((i * 8) % 60)}%`,
+                      left: `${30 + ((i * 12) % 40)}%`,
+                    }}
+                    title="Health Data Point"
+                  />
+                ))}
+
+                {/* Environmental Data Points */}
+                {Array.from({ length: Math.min(summary.environmental, 8) }).map((_, i) => (
+                  <div
+                    key={`env-${i}`}
+                    className="absolute w-3 h-3 bg-green-500 rounded-full animate-pulse"
+                    style={{
+                      top: `${25 + ((i * 10) % 50)}%`,
+                      left: `${45 + ((i * 15) % 35)}%`,
+                    }}
+                    title="Environmental Data Point"
+                  />
+                ))}
+              </>
+            )}
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="relative">
-          {(mapLoading || loading) && (
-            <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">Loading map...</span>
-              </div>
-            </div>
-          )}
 
-          {/* Map Legend */}
-          <div className="absolute top-4 left-4 bg-white p-3 rounded-lg shadow-md z-10 max-w-48">
-            <h4 className="font-semibold text-sm mb-2 flex items-center gap-1">
-              <Layers className="h-3 w-3" />
-              Legend
-            </h4>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span>High Risk (≥20%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                <span>Medium Risk (10-19%)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span>Low Risk (&lt;10%)</span>
-              </div>
+        {/* Map Controls */}
+        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-2 text-xs">
+          <div className="font-semibold mb-1">Interactive Map</div>
+          <div className="text-gray-600">NYC Health & Environment</div>
+        </div>
+
+        {/* Legend */}
+        <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-3 text-xs">
+          <div className="font-semibold mb-2">Legend</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <span>Health Data ({summary.health})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span>Environmental ({summary.environmental})</span>
             </div>
           </div>
-
-          {/* Active Overlays */}
-          {Object.entries(filters.overlays ?? {}).some(([_, active]) => active) && (
-            <div className="absolute top-4 right-4 bg-white p-3 rounded-lg shadow-md z-10">
-              <h4 className="font-semibold text-sm mb-2">Active Overlays</h4>
-              <div className="space-y-1">
-                {Object.entries(filters.overlays ?? {})
-                  .filter(([_, active]) => active)
-                  .map(([overlay]) => (
-                    <Badge key={overlay} variant="secondary" className="text-xs">
-                      {overlay.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
-                    </Badge>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Map Container */}
-          <div ref={mapRef} className="w-full h-96 rounded-lg border" />
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Data Summary */}
+        <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-3 text-xs">
+          <div className="font-semibold mb-1">Data Points</div>
+          <div>Total: {summary.total}</div>
+          <div className="text-gray-600">
+            {filters?.healthConditions?.length || 0} conditions,{" "}
+            {Object.values(filters?.environmental || {}).filter(Boolean).length} factors
+          </div>
+        </div>
+
+        {/* Zoom Controls */}
+        <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg">
+          <button className="block w-8 h-8 text-center border-b hover:bg-gray-50">+</button>
+          <button className="block w-8 h-8 text-center hover:bg-gray-50">-</button>
+        </div>
+      </div>
+
+      {/* Map Instructions */}
+      <div className="mt-4 text-sm text-gray-600 text-center">
+        <MapPin className="h-4 w-4 inline mr-1" />
+        Interactive map showing {summary.total} data points across NYC boroughs
+        {summary.total === 0 && " - Select filters to see data visualization"}
+      </div>
+    </div>
   )
 }

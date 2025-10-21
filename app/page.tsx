@@ -283,6 +283,7 @@ export default function HealthEquityDashboard() {
   }, [filters])
 
   const handleFiltersChange = (newFilters: typeof filters) => {
+    console.log("🔄 Filters changed:", newFilters)
     setFilters(newFilters)
   }
 
@@ -298,20 +299,25 @@ export default function HealthEquityDashboard() {
 
   // Generate mock health data based on filters
   const generateHealthDataFromFilters = (currentFilters: FilterState): HealthData[] => {
+    console.log("📊 Generating health data from filters:", currentFilters)
     const generatedData: HealthData[] = []
 
     // If no health conditions selected, return empty array
     if (!currentFilters.healthConditions || currentFilters.healthConditions.length === 0) {
+      console.log("⚠️ No health conditions selected, returning empty data")
       return generatedData
     }
 
-    const selectedBorough = currentFilters.borough !== "allBoroughs" ? currentFilters.borough : null
-    const boroughsToProcess = selectedBorough
-      ? [selectedBorough]
-      : ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"]
+    const selectedBoroughs =
+      currentFilters.geographic?.boroughs?.length > 0
+        ? currentFilters.geographic.boroughs
+        : ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"]
+
+    console.log("🏙️ Selected boroughs:", selectedBoroughs)
+    console.log("🏥 Selected conditions:", currentFilters.healthConditions)
 
     currentFilters.healthConditions.forEach((condition, conditionIndex) => {
-      boroughsToProcess.forEach((borough, boroughIndex) => {
+      selectedBoroughs.forEach((borough, boroughIndex) => {
         const conditionRates = HEALTH_CONDITION_RATES[condition as keyof typeof HEALTH_CONDITION_RATES]
         if (conditionRates) {
           const rate = conditionRates[borough as keyof typeof conditionRates] || conditionRates.allBoroughs
@@ -328,7 +334,7 @@ export default function HealthEquityDashboard() {
           const population = boroughPopulations[borough as keyof typeof boroughPopulations]
           const cases = Math.round((rate / 100) * population)
 
-          generatedData.push({
+          const dataPoint = {
             id: `${condition}_${borough}_${conditionIndex}_${boroughIndex}`,
             condition: condition,
             borough: borough,
@@ -336,23 +342,28 @@ export default function HealthEquityDashboard() {
             rate: rate,
             cases: cases,
             population: population,
-            ageGroup: currentFilters.ageGroups?.[0] || "All Ages",
-            raceEthnicity: currentFilters.raceEthnicities?.[0] || "All Races",
+            ageGroup: currentFilters.demographics?.ageGroups?.[0] || "All Ages",
+            raceEthnicity: currentFilters.demographics?.ethnicities?.[0] || "All Races",
             year: 2024,
-          })
+          }
+
+          generatedData.push(dataPoint)
+          console.log(`✅ Generated data point: ${condition} in ${borough} - ${rate}%`)
         }
       })
     })
 
+    console.log(`📈 Total generated health data points: ${generatedData.length}`)
     return generatedData
   }
 
   // Generate comprehensive data including environmental factors
   const generateComprehensiveDataFromFilters = async (currentFilters: any) => {
+    console.log("🔄 Generating comprehensive data from filters:", currentFilters)
     const healthData = generateHealthDataFromFilters(currentFilters)
     const environmentalData = await generateEnvironmentalDataFromFilters(currentFilters)
 
-    return {
+    const comprehensiveResult = {
       cdcData: healthData.map((item, index) => ({
         id: item.id,
         source: "CDC",
@@ -385,10 +396,20 @@ export default function HealthEquityDashboard() {
         },
       },
     }
+
+    console.log("📊 Comprehensive data generated:", {
+      healthDataPoints: healthData.length,
+      environmentalDataPoints: environmentalData.length,
+      totalRecords: comprehensiveResult.stats.totalRecords,
+      averageRate: comprehensiveResult.stats.averageRate,
+    })
+
+    return comprehensiveResult
   }
 
   // Add this new function to generate environmental data
   const generateEnvironmentalDataFromFilters = async (currentFilters: any) => {
+    console.log("🌍 Generating environmental data from filters:", currentFilters.environmental)
     const environmentalData: any[] = []
 
     if (!currentFilters.environmental) return environmentalData
@@ -400,6 +421,7 @@ export default function HealthEquityDashboard() {
 
     // Air Quality Data
     if (currentFilters.environmental.airQuality) {
+      console.log("🌬️ Adding air quality data")
       const airQualityScores = {
         Manhattan: 65,
         Brooklyn: 58,
@@ -429,6 +451,7 @@ export default function HealthEquityDashboard() {
 
     // Green Space Access
     if (currentFilters.environmental.greenSpace) {
+      console.log("🌳 Adding green space data")
       const greenSpaceAccess = {
         Manhattan: 78,
         Brooklyn: 65,
@@ -458,6 +481,7 @@ export default function HealthEquityDashboard() {
 
     // Food Access
     if (currentFilters.environmental.foodAccess) {
+      console.log("🍎 Adding food access data")
       const foodAccessScores = {
         Manhattan: 85,
         Brooklyn: 72,
@@ -487,6 +511,7 @@ export default function HealthEquityDashboard() {
 
     // Transit Access
     if (currentFilters.environmental.transitAccess) {
+      console.log("🚇 Adding transit access data")
       const transitScores = {
         Manhattan: 95,
         Brooklyn: 82,
@@ -516,6 +541,7 @@ export default function HealthEquityDashboard() {
 
     // Housing Quality
     if (currentFilters.environmental.housingQuality) {
+      console.log("🏠 Adding housing quality data")
       const housingScores = {
         Manhattan: 72,
         Brooklyn: 68,
@@ -543,11 +569,13 @@ export default function HealthEquityDashboard() {
       })
     }
 
+    console.log(`🌍 Total environmental data points generated: ${environmentalData.length}`)
     return environmentalData
   }
 
   // Generate borough data for map based on filters
   const generateBoroughDataFromFilters = (currentFilters: FilterState): BoroughData[] => {
+    console.log("🗺️ Generating borough data from filters")
     const boroughCoordinates = {
       Manhattan: [40.7831, -73.9712] as [number, number],
       Brooklyn: [40.6782, -73.9442] as [number, number],
@@ -564,7 +592,13 @@ export default function HealthEquityDashboard() {
       "Staten Island": 495747,
     }
 
-    return Object.entries(boroughCoordinates).map(([borough, coordinates]) => {
+    const selectedBoroughs =
+      currentFilters.geographic?.boroughs?.length > 0
+        ? currentFilters.geographic.boroughs
+        : Object.keys(boroughCoordinates)
+
+    const boroughDataResult = selectedBoroughs.map((borough) => {
+      const coordinates = boroughCoordinates[borough as keyof typeof boroughCoordinates]
       let averageRate = 0
       let conditionCount = 0
 
@@ -591,11 +625,15 @@ export default function HealthEquityDashboard() {
         population: boroughPopulations[borough as keyof typeof boroughPopulations],
       }
     })
+
+    console.log(`🗺️ Generated ${boroughDataResult.length} borough data points`)
+    return boroughDataResult
   }
 
   // Update data when filters change
   useEffect(() => {
     const updateData = async () => {
+      console.log("🔄 Filters changed, updating data...")
       setLoading(true)
 
       try {
@@ -607,13 +645,13 @@ export default function HealthEquityDashboard() {
         setBoroughData(newBoroughData)
         setComprehensiveData(newComprehensiveData)
 
-        console.log("Data updated:", {
+        console.log("✅ Data updated successfully:", {
           healthData: newHealthData.length,
           boroughData: newBoroughData.length,
-          comprehensiveData: newComprehensiveData,
+          comprehensiveData: newComprehensiveData.stats.totalRecords,
         })
       } catch (error) {
-        console.error("Error updating data:", error)
+        console.error("❌ Error updating data:", error)
       } finally {
         setLoading(false)
       }
@@ -623,11 +661,13 @@ export default function HealthEquityDashboard() {
   }, [filters])
 
   const handleComprehensiveDataUpdate = (data: any) => {
+    console.log("📊 Comprehensive data updated:", data)
     setComprehensiveData(data)
   }
 
   // Handle filter application
   const handleApplyFilters = () => {
+    console.log("🎯 Applying filters...")
     setLoading(true)
 
     // Simulate loading time
@@ -839,6 +879,7 @@ export default function HealthEquityDashboard() {
         const envLevel = item.value > 75 ? "POOR" : item.value > 50 ? "FAIR" : "GOOD"
         const meaning =
           item.value > 75 ? "Environmental conditions may impact health" : "Environmental conditions are acceptable"
+
         const action =
           item.value > 75
             ? "Advocate for environmental improvements and protect yourself"
@@ -893,7 +934,10 @@ export default function HealthEquityDashboard() {
       <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 text-white overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <video className="absolute inset-0 w-full h-full object-cover opacity-30" autoPlay loop muted playsInline>
-          <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Hero_image_of_202507142204_xfk8l-6xKbcxs7pDFb1YSmlBeLixV4G3cqOv.mp4" type="video/mp4" />
+          <source
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Hero_image_of_202507142204_xfk8l-6xKbcxs7pDFb1YSmlBeLixV4G3cqOv.mp4"
+            type="video/mp4"
+          />
         </video>
         <div className="relative container mx-auto px-4 py-16">
           <div className="max-w-4xl">
@@ -964,10 +1008,10 @@ export default function HealthEquityDashboard() {
             </div>
           )}
 
-          {/* Updated grid layout: wider filter panel, narrower main content */}
-          <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 min-h-[800px]">
-            {/* Filter Panel - Now takes 2 columns for better readability */}
-            <div className="lg:col-span-2 h-full">
+          {/* Updated grid layout: filter panel on left, main content on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 min-h-[800px]">
+            {/* Filter Panel - Left sidebar */}
+            <div className="lg:col-span-1 h-full">
               <FilterPanel
                 filters={filters}
                 onFiltersChange={setFilters}
@@ -976,8 +1020,8 @@ export default function HealthEquityDashboard() {
               />
             </div>
 
-            {/* Main Content - Now takes 5 columns */}
-            <div className="lg:col-span-5 space-y-6 h-full flex flex-col">
+            {/* Main Content - Right side */}
+            <div className="lg:col-span-3 space-y-6 h-full flex flex-col">
               {/* NYC Health Overview Section - Moved from hero */}
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
                 <h3 className="text-xl font-semibold mb-4 text-white">
@@ -1321,15 +1365,8 @@ export default function HealthEquityDashboard() {
 
                             {/* Show selected environmental factors */}
                             <div className="space-y-2">
-                              {Array.isArray(filters.environmentalFactors) &&
-                                filters.environmentalFactors.map((factor, index) => (
-                                  <div key={index} className="flex items-center gap-2 text-sm">
-                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                    <span className="font-medium">{factor}</span>
-                                  </div>
-                                ))}
-                              {filters.overlays &&
-                                Object.entries(filters.overlays)
+                              {filters.environmental &&
+                                Object.entries(filters.environmental)
                                   .filter(([_, value]) => value)
                                   .map(([key, _], index) => (
                                     <div key={index} className="flex items-center gap-2 text-sm">

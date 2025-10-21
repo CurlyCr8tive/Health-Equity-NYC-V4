@@ -1,14 +1,31 @@
 export interface FilterState {
   healthConditions: string[]
-  borough: string
-  zipCode: string
-  neighborhood: string
-  radius: string
-  ageGroups: string[]
-  raceEthnicities: string[]
-  includeNeighborhood: boolean
-  environmentalFactors: string[] // Up to 2 environmental factors
-  overlays: {
+  demographics: {
+    ageGroups: string[]
+    ethnicities: string[]
+    incomeRanges: string[]
+  }
+  environmental: {
+    airQuality: boolean
+    greenSpace: boolean
+    foodAccess: boolean
+    transitAccess: boolean
+    housingQuality: boolean
+  }
+  geographic: {
+    boroughs: string[]
+    neighborhoods: string[]
+  }
+  // Legacy properties for backward compatibility
+  borough?: string
+  zipCode?: string
+  neighborhood?: string
+  radius?: string
+  ageGroups?: string[]
+  raceEthnicities?: string[]
+  includeNeighborhood?: boolean
+  environmentalFactors?: string[]
+  overlays?: {
     foodDeserts: boolean
     snapAccess: boolean
     greenSpace: boolean
@@ -21,6 +38,7 @@ export interface FilterState {
 }
 
 export interface HealthData {
+  id: string
   condition: string
   borough: string
   neighborhood: string
@@ -30,6 +48,13 @@ export interface HealthData {
   ageGroup: string
   raceEthnicity: string
   year: number
+}
+
+export interface BoroughData {
+  name: string
+  coordinates: [number, number]
+  rate: number
+  population: number
 }
 
 export interface EnvironmentalData {
