@@ -1,5 +1,32 @@
 /// lib/web-scraper.ts
 
+export const DATA_SOURCES = {
+  CDC: {
+    name: "Centers for Disease Control and Prevention",
+    url: "https://www.cdc.gov",
+    description: "National health condition data",
+    reliability: "High",
+  },
+  EpiQuery: {
+    name: "NYC DOHMH EpiQuery",
+    url: "https://a816-health.nyc.gov",
+    description: "NYC-specific community health indicators",
+    reliability: "High",
+  },
+  NYCOpenData: {
+    name: "NYC Open Data Portal",
+    url: "https://opendata.cityofnewyork.us",
+    description: "Environmental and demographic data for NYC",
+    reliability: "Medium",
+  },
+  EnvironmentalProtectionAgency: {
+    name: "Environmental Protection Agency",
+    url: "https://www.epa.gov",
+    description: "Air quality and environmental data",
+    reliability: "High",
+  },
+}
+
 export class WebScraper {
   private rateLimits: { [key: string]: { lastCalled: number; delay: number } } = {}
 

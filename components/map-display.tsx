@@ -3,18 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import {
-  Map,
-  MapPin,
-  Layers,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Info,
-  AlertTriangle,
-  CheckCircle,
-  Activity,
-} from "lucide-react"
+import { Map, MapPin, Layers, ZoomIn, ZoomOut, RotateCcw, Info, AlertTriangle, CheckCircle, Activity } from 'lucide-react'
 
 interface MapDisplayProps {
   healthData: any[]
@@ -29,6 +18,14 @@ export default function MapDisplay({ healthData, boroughData, filters, onFilters
   const [mapLoaded, setMapLoaded] = useState(false)
   const mapRef = useRef<HTMLDivElement>(null)
 
+  const DEFAULT_HEALTH_DATA = [
+    { borough: "Manhattan", condition: "Hypertension", rate: 22.8, cases: 38000, population: 1694251 },
+    { borough: "Brooklyn", condition: "Hypertension", rate: 28.7, cases: 78000, population: 2736074 },
+    { borough: "Queens", condition: "Hypertension", rate: 25.3, cases: 61000, population: 2405464 },
+    { borough: "Bronx", condition: "Hypertension", rate: 32.1, cases: 47000, population: 1472654 },
+    { borough: "Staten Island", condition: "Hypertension", rate: 26.4, cases: 13000, population: 495747 },
+  ]
+
   // Simulate map initialization
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,9 +34,11 @@ export default function MapDisplay({ healthData, boroughData, filters, onFilters
     return () => clearTimeout(timer)
   }, [])
 
+  const displayData = healthData && healthData.length > 0 ? healthData : DEFAULT_HEALTH_DATA
+
   // Calculate data points for display
   const getDataPointCounts = () => {
-    const healthPoints = healthData.length
+    const healthPoints = displayData.length
     const environmentalPoints = filters.environmental
       ? Object.values(filters.environmental).filter(Boolean).length * 5 // 5 boroughs
       : 0
@@ -66,7 +65,7 @@ export default function MapDisplay({ healthData, boroughData, filters, onFilters
     ]
 
     return boroughs.map((borough) => {
-      const boroughHealthData = healthData.filter((item) => item.borough === borough.name)
+      const boroughHealthData = displayData.filter((item) => item.borough === borough.name)
       const avgRate =
         boroughHealthData.length > 0
           ? boroughHealthData.reduce((sum, item) => sum + item.rate, 0) / boroughHealthData.length
@@ -417,7 +416,7 @@ export default function MapDisplay({ healthData, boroughData, filters, onFilters
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {(() => {
                 const boroughData = boroughVisData.find((b) => b.name === selectedBorough)
-                const boroughHealthData = healthData.filter((item) => item.borough === selectedBorough)
+                const boroughHealthData = displayData.filter((item) => item.borough === selectedBorough)
 
                 return (
                   <>
@@ -453,11 +452,11 @@ export default function MapDisplay({ healthData, boroughData, filters, onFilters
             </div>
 
             {/* Detailed Health Conditions */}
-            {healthData.filter((item) => item.borough === selectedBorough).length > 0 && (
+            {displayData.filter((item) => item.borough === selectedBorough).length > 0 && (
               <div className="mt-6">
                 <h4 className="font-semibold text-gray-800 mb-3">Health Conditions in {selectedBorough}</h4>
                 <div className="space-y-2">
-                  {healthData
+                  {displayData
                     .filter((item) => item.borough === selectedBorough)
                     .slice(0, 5)
                     .map((item, index) => (

@@ -3,24 +3,12 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { MapPin, Users, Leaf, Map } from "lucide-react"
+import { MapPin, Users, Leaf, Map } from 'lucide-react'
 import { FilterPanel } from "@/components/filter-panel"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Heart,
-  TrendingUp,
-  Brain,
-  Home,
-  AlertTriangle,
-  Phone,
-  Stethoscope,
-  Wind,
-  TreePine,
-  BarChart3,
-  BookOpen,
-} from "lucide-react"
+import { Heart, TrendingUp, Brain, Home, AlertTriangle, Phone, Stethoscope, Wind, TreePine, BarChart3, BookOpen } from 'lucide-react'
 import type { FilterState, HealthData, BoroughData } from "@/types"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 import DataVisualizations from "@/components/data-visualizations"
 import MapDisplay from "@/components/map-display"
 import AISummary from "@/components/ai-summary"
@@ -1032,16 +1020,16 @@ export default function HealthEquityDashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h4 className={`text-2xl font-bold ${insights.statusColor}`}>{insights.healthStatus}</h4>
-                      <p className="text-gray-800">
+                      <p className="text-gray-900">
                         {insights.isDefault
                           ? "Top health challenges affecting all New Yorkers"
                           : "Overall health situation in your area"}
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-white">{insights.peopleAffectedPer100}</div>
-                      <div className="text-sm text-blue-100">out of 100 New Yorkers</div>
-                      <div className="text-xs text-blue-200">
+                      <div className="text-3xl font-bold text-gray-900">{insights.peopleAffectedPer100}</div>
+                      <div className="text-sm text-gray-700">out of 100 New Yorkers</div>
+                      <div className="text-xs text-gray-800">
                         {insights.isDefault ? "have high blood pressure" : "are affected"}
                       </div>
                     </div>
@@ -1049,8 +1037,8 @@ export default function HealthEquityDashboard() {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white/20 rounded-lg p-4">
-                      <div className="text-lg font-semibold text-white">What This Means</div>
-                      <p className="text-sm text-gray-800">
+                      <div className="text-lg font-semibold text-gray-900">What This Means</div>
+                      <p className="text-sm text-gray-900">
                         High blood pressure and diabetes are NYC's biggest health challenges. Nearly 1 in 3 adults has
                         high blood pressure, and 1 in 8 has diabetes. Use the filters on the left to see what's
                         happening in your specific neighborhood.
@@ -1058,19 +1046,19 @@ export default function HealthEquityDashboard() {
                     </div>
 
                     <div className="bg-white/20 rounded-lg p-4">
-                      <div className="text-lg font-semibold text-white">Action Needed</div>
-                      <p className="text-sm text-gray-800">
+                      <div className="text-lg font-semibold text-gray-900">Action Needed</div>
+                      <p className="text-sm text-gray-900">
                         Learn about your neighborhood's health risks and find local resources to stay healthy.
                       </p>
                       <div
                         className={`text-xs mt-1 ${
                           insights.urgency === "High"
-                            ? "text-red-200"
+                            ? "text-red-800"
                             : insights.urgency === "Medium"
-                              ? "text-orange-200"
+                              ? "text-orange-800"
                               : insights.urgency === "Info"
-                                ? "text-blue-200"
-                                : "text-green-200"
+                                ? "text-blue-800"
+                                : "text-green-800"
                         }`}
                       >
                         Priority: {insights.urgency}
@@ -1078,9 +1066,9 @@ export default function HealthEquityDashboard() {
                     </div>
 
                     <div className="bg-white/20 rounded-lg p-4">
-                      <div className="text-lg font-semibold text-white">Environmental Risks</div>
-                      <div className="text-2xl font-bold text-orange-100">{insights.envRiskFactors}</div>
-                      <p className="text-xs text-gray-800">
+                      <div className="text-lg font-semibold text-gray-900">Environmental Risks</div>
+                      <div className="text-2xl font-bold text-orange-800">{insights.envRiskFactors}</div>
+                      <p className="text-xs text-gray-900">
                         Air quality and access to healthy food are the top environmental concerns affecting health
                         across all NYC neighborhoods.
                       </p>
