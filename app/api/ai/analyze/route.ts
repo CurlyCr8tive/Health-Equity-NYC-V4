@@ -1,7 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
-import { openai } from "@ai-sdk/openai"
-import { google } from "@ai-sdk/google"
 
 export async function POST(request: NextRequest) {
   try {
@@ -79,11 +77,16 @@ Return only valid JSON with this structure:
       try {
         console.log("🤖 Using Google Gemini API for comprehensive multi-source analysis")
 
+        const { google } = await import("@ai-sdk/google")
+
         const comprehensiveData = await fetchAllDataSources(filters)
-        const result = await generateGeminiAnalysis({
-          ...body,
-          ...comprehensiveData,
-        })
+        const result = await generateGeminiAnalysis(
+          {
+            ...body,
+            ...comprehensiveData,
+          },
+          google,
+        )
 
         return NextResponse.json(result)
       } catch (geminiError) {
@@ -95,6 +98,8 @@ Return only valid JSON with this structure:
     if (process.env.OPENAI_API_KEY) {
       try {
         console.log("🤖 Using OpenAI API for comprehensive multi-source analysis")
+
+        const { openai } = await import("@ai-sdk/openai")
 
         const { text } = await generateText({
           model: openai("gpt-4o"),
@@ -344,7 +349,7 @@ async function fetchNYCOpenData(filters: any) {
 }
 
 // ✅ Google Gemini API Integration for Comprehensive Analysis
-async function generateGeminiAnalysis(data: any) {
+async function generateGeminiAnalysis(data: any, googleProvider: any) {
   const {
     healthData = [],
     environmentalData = [],
@@ -372,7 +377,7 @@ async function generateGeminiAnalysis(data: any) {
 
   try {
     const { text } = await generateText({
-      model: google("gemini-1.5-flash"),
+      model: googleProvider("gemini-1.5-flash"),
       prompt: analysisPrompt,
       maxTokens: 4000,
       temperature: 0.7,

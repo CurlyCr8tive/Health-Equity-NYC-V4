@@ -64,35 +64,76 @@ export default function AISummary({
         filters,
       })
 
-      const response = await fetch("/api/reports", {
+      const response = await fetch("/api/ai/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          healthData: comprehensiveData.cdcData || [],
+          // Map healthData to 'data' as expected by the analyze endpoint
+          data: comprehensiveData.cdcData || [],
           environmentalData: comprehensiveData.epiQueryData || [],
           filters: filters,
-          analysisType: "community",
         }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+      const text = await response.text()
+      let result
+
+      try {
+        result = JSON.parse(text)
+      } catch (e) {
+        console.error("Failed to parse AI response:", text.substring(0, 100))
+        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
       }
 
-      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP error! status: ${response.status}`)
+      }
+
       console.log("✅ AI analysis generated successfully")
 
-      setAnalysis(result.analysis)
+      let formattedAnalysis = ""
+
+      if (typeof result === "string") {
+        formattedAnalysis = result
+      } else {
+        // Construct markdown from structured response
+        if (result.summary) formattedAnalysis += `# Executive Summary\n${result.summary}\n\n`
+
+        if (result.insights && Array.isArray(result.insights)) {
+          formattedAnalysis += `## Key Insights\n${result.insights.map((i: string) => `- ${i}`).join("\n")}\n\n`
+        }
+
+        if (result.topConcerns && Array.isArray(result.topConcerns)) {
+          formattedAnalysis += `## Top Health Concerns\n${result.topConcerns.map((c: any) => `- **${c.condition}**: ${c.severity.toUpperCase()} severity in ${c.affectedAreas?.join(", ")}`).join("\n")}\n\n`
+        }
+
+        if (result.correlations && Array.isArray(result.correlations)) {
+          formattedAnalysis += `## Environmental Correlations\n${result.correlations.map((c: any) => `- ${c.significance}`).join("\n")}\n\n`
+        }
+
+        if (result.recommendations && Array.isArray(result.recommendations)) {
+          formattedAnalysis += `## Recommended Actions\n${result.recommendations.map((r: string) => `- ${r}`).join("\n")}`
+        }
+
+        // Fallback if structure is different
+        if (!formattedAnalysis && result.analysis) formattedAnalysis = result.analysis
+      }
+
+      setAnalysis(formattedAnalysis)
 
       // Update comprehensive data with AI insights
       if (onAnalysisComplete) {
         onAnalysisComplete({
           ...comprehensiveData,
-          aiAnalysis: result.analysis,
-          aiStats: result.stats,
+          aiAnalysis: formattedAnalysis,
+          aiStats: result.stats || {
+            // Provide fallback stats if not present
+            conditionsCount: comprehensiveData.cdcData?.length || 0,
+            environmentalFactorsCount: comprehensiveData.epiQueryData?.length || 0,
+            averageRate: 0, // Calculate if needed
+          },
         })
       }
     } catch (error: any) {
