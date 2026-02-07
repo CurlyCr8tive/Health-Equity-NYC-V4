@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { WebScraper, DATA_SOURCES, type CDCEndpoint } from "@/lib/web-scraper"
+import { WebScraper, type CDCEndpoint } from "@/lib/web-scraper"
 
 // CDC Data Scraping API
 export async function GET(request: NextRequest) {
@@ -9,38 +9,15 @@ export async function GET(request: NextRequest) {
   const endpoint = (searchParams.get("endpoint") as CDCEndpoint) || "chronic_disease"
   const limit = Number.parseInt(searchParams.get("limit") || "1000")
   const state = searchParams.get("state") || "New York"
-  const year = searchParams.get("year")
+  const year = searchParams.get("year") || undefined
 
   try {
-    console.log(`Scraping CDC data: ${endpoint}`)
+    console.log(`[CDC Scraper] Fetching CDC data: ${endpoint}`)
 
-    const baseUrl = DATA_SOURCES.CDC.baseUrl
-    const endpointPath = DATA_SOURCES.CDC.endpoints[endpoint]
-
-    // Build query parameters
-    const params = new URLSearchParams({
-      $limit: limit.toString(),
-      $order: "year DESC",
-    })
-
-    // Add filters
-    const whereConditions = []
-    if (state) {
-      whereConditions.push(`locationdesc='${state}'`)
-    }
-    if (year) {
-      whereConditions.push(`year='${year}'`)
-    }
-
-    if (whereConditions.length > 0) {
-      params.append("$where", whereConditions.join(" AND "))
-    }
-
-    const url = `${baseUrl}${endpointPath}?${params.toString()}`
-    const rawData = await scraper.fetchWithRetry(url, {}, 3, 60) // Cache for 1 hour
+    const rawData = await scraper.fetchCDCData(endpoint, { state, year, limit })
 
     // Transform CDC data to our format
-    const transformedData = transformCDCData(rawData, endpoint)
+    const transformedData = transformCDCData(rawData, endpoint, scraper)
 
     return NextResponse.json({
       success: true,
@@ -49,13 +26,13 @@ export async function GET(request: NextRequest) {
       data: transformedData,
       metadata: {
         total_records: transformedData.length,
+        raw_records: rawData.length,
         last_updated: new Date().toISOString(),
-        source_url: url,
         filters: { state, year, limit },
       },
     })
   } catch (error) {
-    console.error("CDC scraping error:", error)
+    console.error("[CDC Scraper] Error:", error)
 
     return NextResponse.json(
       {
@@ -67,7 +44,6 @@ export async function GET(request: NextRequest) {
         metadata: {
           total_records: 0,
           last_updated: new Date().toISOString(),
-          error_details: error,
         },
       },
       { status: 500 },
@@ -75,10 +51,8 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function transformCDCData(rawData: any[], endpoint: CDCEndpoint): any[] {
+function transformCDCData(rawData: any[], endpoint: CDCEndpoint, scraper: WebScraper): any[] {
   if (!Array.isArray(rawData)) return []
-
-  const scraper = WebScraper.getInstance()
 
   switch (endpoint) {
     case "chronic_disease":
