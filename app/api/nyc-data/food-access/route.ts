@@ -94,7 +94,7 @@ const generateMockFoodAccessData = () => {
     { name: "Local Grocery", borough: "Staten Island", type: "Grocery Store", healthyOptions: 65 },
   ]
 
-  const data = []
+  const data: any[] = []
   let id = 1
 
   stores.forEach((store) => {
@@ -172,7 +172,7 @@ function generateOperatingHours(): string {
 
 // Retry mechanism for NYC Food Access API with borough filtering
 async function fetchNYCFoodAccessData(logger: FoodAccessAPILogger): Promise<any> {
-  const strategies = [
+  const strategies: { name: string; url: string; headers: Record<string, string> }[] = [
     {
       name: "NYC Food Retail Stores API with App Token",
       url: "https://data.cityofnewyork.us/resource/9a8c-vfzj.json?$limit=1000",

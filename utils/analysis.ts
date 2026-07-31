@@ -59,7 +59,9 @@ export function generateMockHealthData(filters: FilterState) {
  */
 export function generateMockEnvironmentalData(filters: FilterState) {
   const factors =
-    filters.environmentalFactors.length > 0 ? filters.environmentalFactors : ["Air Quality", "Green Space Access"]
+    filters.environmentalFactors && filters.environmentalFactors.length > 0
+      ? filters.environmentalFactors
+      : ["Air Quality", "Green Space Access"]
 
   return factors.map((factor) => ({
     factor,
@@ -87,7 +89,7 @@ export function generateTopConditions(filters: FilterState) {
 export function generateFallbackAnalysis(filters: FilterState): string {
   const location = filters.borough || filters.neighborhood || "NYC"
   const hasConditions = filters.healthConditions.length > 0
-  const hasEnvironmental = filters.environmentalFactors.length > 0
+  const hasEnvironmental = (filters.environmentalFactors?.length ?? 0) > 0
 
   return `# Health Equity Analysis for ${location}
 
@@ -97,7 +99,9 @@ This analysis examines health conditions and environmental factors in ${location
       ? `The primary focus is on **${filters.healthConditions.join("**, **")}**. `
       : "All major health conditions are included. "
   }${
-    hasEnvironmental ? `Environmental factors studied include **${filters.environmentalFactors.join("**, **")}**.` : ""
+    hasEnvironmental
+      ? `Environmental factors studied include **${filters.environmentalFactors?.join("**, **")}**.`
+      : ""
   }
 
 ## Key Findings

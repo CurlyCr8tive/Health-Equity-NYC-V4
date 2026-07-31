@@ -7,6 +7,7 @@ import { AlertTriangle, MapPin } from "lucide-react"
 interface MapComponentProps {
   filters?: any
   data?: any
+  environmentalData?: any[]
   loading?: boolean
 }
 

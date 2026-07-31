@@ -45,6 +45,7 @@ export default function DynamicCharts({ data, filters }: DynamicChartsProps) {
         }))
 
         // Create canvas element
+        if (!chartRef.current) return
         const canvas = document.createElement("canvas")
         chartRef.current.innerHTML = ""
         chartRef.current.appendChild(canvas)
@@ -56,7 +57,7 @@ export default function DynamicCharts({ data, filters }: DynamicChartsProps) {
             labels: chartData.map((item) => item.borough),
             datasets: [
               {
-                label: filters.healthCondition || "All Conditions",
+                label: filters.healthConditions?.join(", ") || "All Conditions",
                 data: chartData.map((item) => item.avgRate),
                 backgroundColor: [
                   "rgba(255, 99, 132, 0.6)",
@@ -82,7 +83,7 @@ export default function DynamicCharts({ data, filters }: DynamicChartsProps) {
             plugins: {
               title: {
                 display: true,
-                text: `Health Rates by Borough${filters.healthCondition ? ` - ${filters.healthCondition}` : ""}`,
+                text: `Health Rates by Borough${filters.healthConditions?.join(", ") ? ` - ${filters.healthConditions?.join(", ")}` : ""}`,
               },
               legend: {
                 position: "top",

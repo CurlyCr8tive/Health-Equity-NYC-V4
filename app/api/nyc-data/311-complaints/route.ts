@@ -288,9 +288,9 @@ export async function GET(request: NextRequest) {
     // Add summary statistics
     const summary = {
       totalComplaints: result.data?.length || 0,
-      byBorough: {},
-      byComplaintType: {},
-      byStatus: {},
+      byBorough: {} as Record<string, number>,
+      byComplaintType: {} as Record<string, number>,
+      byStatus: {} as Record<string, number>,
       healthRelevanceDistribution: {
         high: 0, // 8-10
         medium: 0, // 5-7

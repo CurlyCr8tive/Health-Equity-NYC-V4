@@ -62,7 +62,7 @@ export default function ChartPanel({ data = [], filters, onShare, onDownload }: 
             key = item.condition || "Unknown"
             break
           case "demographic":
-            key = item.demographic || "Unknown"
+            key = item.ageGroup || "Unknown"
             break
           default:
             key = "Unknown"
@@ -147,7 +147,7 @@ export default function ChartPanel({ data = [], filters, onShare, onDownload }: 
               <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
               <YAxis />
               <Tooltip
-                formatter={(value: number) => [formatPercentage(value), "Rate"]}
+                formatter={(value: any) => [formatPercentage(value), "Rate"]}
                 labelFormatter={(label) => `${groupBy}: ${label}`}
               />
               <Bar dataKey="value" fill={COLORS[0]} />
@@ -163,7 +163,7 @@ export default function ChartPanel({ data = [], filters, onShare, onDownload }: 
               <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
               <YAxis />
               <Tooltip
-                formatter={(value: number) => [formatPercentage(value), "Rate"]}
+                formatter={(value: any) => [formatPercentage(value), "Rate"]}
                 labelFormatter={(label) => `${groupBy}: ${label}`}
               />
               <Line type="monotone" dataKey="value" stroke={COLORS[0]} strokeWidth={2} />
@@ -189,7 +189,7 @@ export default function ChartPanel({ data = [], filters, onShare, onDownload }: 
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => [formatPercentage(value), "Rate"]} />
+              <Tooltip formatter={(value: any) => [formatPercentage(value), "Rate"]} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
@@ -304,7 +304,7 @@ export default function ChartPanel({ data = [], filters, onShare, onDownload }: 
           <div className="border rounded-lg p-4">{renderChart()}</div>
 
           {/* Chart Explanation */}
-          <ChartExplanation chartType={chartType} groupBy={groupBy} />
+          <ChartExplanation chartType={chartType} />
 
           {/* Active Filters Display */}
           {(filters.healthConditions.length > 0 || envFactors.length > 0 || filters.borough || filters.zipCode) && (

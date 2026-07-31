@@ -94,7 +94,7 @@ const generateMockSNAPAccessData = () => {
     { name: "Port Richmond Social Services", borough: "Staten Island", type: "Social Services", services: 60 },
   ]
 
-  const data = []
+  const data: any[] = []
   let id = 1
 
   facilities.forEach((facility) => {
@@ -204,7 +204,7 @@ function generatePhoneNumber(): string {
 
 // Retry mechanism for NYC SNAP Access API with borough filtering
 async function fetchNYCSNAPAccessData(logger: SNAPAccessAPILogger): Promise<any> {
-  const strategies = [
+  const strategies: { name: string; url: string; headers: Record<string, string> }[] = [
     {
       name: "NYC Social Services Locations API with App Token",
       url: "https://data.cityofnewyork.us/resource/pqg4-dm6b.json?$limit=1000",

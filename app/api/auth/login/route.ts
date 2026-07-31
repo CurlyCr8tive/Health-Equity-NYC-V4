@@ -1,36 +1,55 @@
 import { type NextRequest, NextResponse } from "next/server"
+import jwt from "jsonwebtoken"
+
+// Demo credentials for testing - matches the Quick Demo Access buttons on the login page
+const DEMO_ACCOUNTS = [
+  { id: "demo-user", email: "demo@healthequity.nyc", password: "demo123", name: "Demo User", role: "resident" },
+  { id: "admin-user", email: "admin@healthequity.nyc", password: "admin123", name: "Admin User", role: "admin" },
+  {
+    id: "worker-user",
+    email: "worker@healthequity.nyc",
+    password: "worker123",
+    name: "Community Health Worker",
+    role: "worker",
+  },
+  {
+    id: "resident-user",
+    email: "resident@healthequity.nyc",
+    password: "resident123",
+    name: "Community Resident",
+    role: "resident",
+  },
+]
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
-    // Demo credentials for testing
-    const DEMO_CREDENTIALS = {
-      email: "demo@healthequity.nyc",
-      password: "demo123",
-    }
+    const account = DEMO_ACCOUNTS.find((a) => a.email === email && a.password === password)
 
-    // Validate demo credentials
-    if (email === DEMO_CREDENTIALS.email && password === DEMO_CREDENTIALS.password) {
-      // Create a simple session token (in production, use proper JWT)
-      const sessionToken = "demo-session-" + Date.now()
+    if (account) {
+      const token = jwt.sign(
+        { userId: account.id, email: account.email, role: account.role, name: account.name },
+        process.env.JWT_SECRET || "fallback-secret",
+        { expiresIn: "7d" },
+      )
 
-      // Set session cookie
       const response = NextResponse.json({
         success: true,
         user: {
-          id: "demo-user",
-          email: email,
-          name: "Demo User",
-          role: "health_worker",
+          id: account.id,
+          email: account.email,
+          name: account.name,
+          role: account.role,
         },
       })
 
-      response.cookies.set("session", sessionToken, {
+      response.cookies.set("auth-token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: "/",
       })
 
       return response

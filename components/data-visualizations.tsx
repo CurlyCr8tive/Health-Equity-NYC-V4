@@ -258,7 +258,7 @@ export default function DataVisualizations({ filters, data }: DataVisualizations
                   <XAxis dataKey="borough" />
                   <YAxis />
                   <Tooltip
-                    formatter={(value: any, name: string) => [
+                    formatter={(value: any, name: any) => [
                       `${value}${name === "healthRate" ? "%" : ""}`,
                       name === "healthRate" ? "Health Rate" : "Environmental Score",
                     ]}
@@ -286,7 +286,7 @@ export default function DataVisualizations({ filters, data }: DataVisualizations
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ condition, avgRate }) => `${condition}: ${avgRate}%`}
+                    label={({ condition, avgRate }: any) => `${condition}: ${avgRate}%`}
                     outerRadius={120}
                     fill="#8884d8"
                     dataKey="avgRate"
@@ -316,7 +316,7 @@ export default function DataVisualizations({ filters, data }: DataVisualizations
                     <XAxis dataKey="borough" />
                     <YAxis />
                     <Tooltip
-                      formatter={(value: any, name: string, props: any) => [
+                      formatter={(value: any, name: any, props: any) => [
                         `${value} ${props.payload.unit}`,
                         props.payload.indicator,
                       ]}

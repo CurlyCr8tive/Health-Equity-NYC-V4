@@ -192,7 +192,8 @@ async function scrapeSingleSource(baseUrl: string, source: string, filters: any,
 
   console.log(`[${sessionId}] Scraping ${source}: ${url}`)
 
-  const response = await scraper.fetchWithRetry(url, {}, 2, 15)
+  const httpResponse = await scraper.fetchWithRetry(url, {}, 2)
+  const response = await httpResponse.json()
 
   if (!response.success) {
     throw new Error(response.error || `Failed to scrape ${source}`)
@@ -228,9 +229,9 @@ export async function POST(request: NextRequest) {
     const baseUrl = getBaseUrl(request)
 
     const healthChecks = await Promise.allSettled([
-      scraper.fetchWithRetry(`${baseUrl}/api/scraping/cdc?endpoint=chronic_disease&limit=1`, {}, 1, 1),
-      scraper.fetchWithRetry(`${baseUrl}/api/scraping/epiquery?endpoint=community_health&limit=1`, {}, 1, 1),
-      scraper.fetchWithRetry(`${baseUrl}/api/scraping/nyc-enhanced?endpoint=health_outcomes&limit=1`, {}, 1, 1),
+      scraper.fetchWithRetry(`${baseUrl}/api/scraping/cdc?endpoint=chronic_disease&limit=1`, {}, 1),
+      scraper.fetchWithRetry(`${baseUrl}/api/scraping/epiquery?endpoint=community_health&limit=1`, {}, 1),
+      scraper.fetchWithRetry(`${baseUrl}/api/scraping/nyc-enhanced?endpoint=health_outcomes&limit=1`, {}, 1),
     ])
 
     const status = {

@@ -20,7 +20,7 @@ export function useEnvironmentalData(filters: FilterState) {
         }
 
         // Fetch data for active overlays
-        const activeOverlays = Object.entries(filters.overlays)
+        const activeOverlays = Object.entries(filters.overlays ?? {})
           .filter(([_, active]) => active)
           .map(([key, _]) => key)
 

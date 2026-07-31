@@ -56,7 +56,7 @@ export default function TopConditionsVisualization({
         acc[condition].totalCases += 1
         acc[condition].totalRate += item.rate || 0
         acc[condition].boroughs.add(item.borough || "Unknown")
-        acc[condition].demographics.add(item.demographic || "Unknown")
+        acc[condition].demographics.add(item.ageGroup || "Unknown")
         acc[condition].records.push(item)
 
         return acc
@@ -279,7 +279,7 @@ export default function TopConditionsVisualization({
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="condition" angle={-45} textAnchor="end" height={80} fontSize={12} />
                       <YAxis />
-                      <Tooltip formatter={(value: number) => [formatPercentage(value), "Rate"]} />
+                      <Tooltip formatter={(value: any) => [formatPercentage(value), "Rate"]} />
                       <Bar dataKey="averageRate" fill="#3B82F6" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -303,7 +303,7 @@ export default function TopConditionsVisualization({
                           <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value: number) => [formatPercentage(value), "Avg Rate"]} />
+                      <Tooltip formatter={(value: any) => [formatPercentage(value), "Avg Rate"]} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

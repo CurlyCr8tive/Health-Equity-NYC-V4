@@ -28,7 +28,18 @@ const FALLBACK_CONTENT: ShareableContent = {
   title: "Health Equity NYC Analysis",
   description: "Community health insights and recommendations",
   data: null,
-  filters: {},
+  filters: {
+    healthConditions: [],
+    demographics: { ageGroups: [], ethnicities: [], incomeRanges: [] },
+    environmental: {
+      airQuality: false,
+      greenSpace: false,
+      foodAccess: false,
+      transitAccess: false,
+      housingQuality: false,
+    },
+    geographic: { boroughs: [], neighborhoods: [] },
+  },
   shareUrl: typeof window !== "undefined" ? window.location.href : "",
 }
 

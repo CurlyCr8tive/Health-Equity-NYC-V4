@@ -94,7 +94,7 @@ const generateMockGreenSpaceData = () => {
     { name: "Snug Harbor Cultural Center", borough: "Staten Island", acres: 83, type: "Garden" },
   ]
 
-  const data = []
+  const data: any[] = []
   let id = 1
 
   parks.forEach((park) => {
@@ -171,7 +171,7 @@ function generateAmenities(parkType: string): string[] {
 
 // Retry mechanism for NYC Green Space API with borough filtering
 async function fetchNYCGreenSpaceData(logger: GreenSpaceAPILogger): Promise<any> {
-  const strategies = [
+  const strategies: { name: string; url: string; headers: Record<string, string> }[] = [
     {
       name: "NYC Parks Properties API with App Token",
       url: "https://data.cityofnewyork.us/resource/enfh-gkve.json?$limit=1000",

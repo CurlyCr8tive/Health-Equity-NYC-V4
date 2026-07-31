@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     // Read and parse CSV
     const fileContent = await file.text()
 
-    let parsedData
+    let parsedData: Record<string, any>[]
     try {
       parsedData = parse(fileContent, {
         columns: true,

@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
     }
 
     const url = `${baseUrl}${endpointPath}?${params.toString()}`
-    const rawData = await scraper.fetchWithRetry(url, {}, 3, 60) // Cache for 1 hour
+    const response = await scraper.fetchWithRetry(url, {}, 3)
+    const rawData = await response.json()
 
     // Transform CDC data to our format
     const transformedData = transformCDCData(rawData, endpoint)

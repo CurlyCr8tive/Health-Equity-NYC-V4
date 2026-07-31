@@ -1,3 +1,10 @@
+export interface AuthUser {
+  id: string
+  email: string
+  name: string
+  role: string
+}
+
 export interface FilterState {
   healthConditions: string[]
   demographics: {
@@ -41,13 +48,14 @@ export interface HealthData {
   id: string
   condition: string
   borough: string
-  neighborhood: string
+  neighborhood?: string
   rate: number
-  cases: number
-  population: number
+  cases?: number
+  population?: number
   ageGroup: string
   raceEthnicity: string
   year: number
+  dataSource?: string
 }
 
 export interface BoroughData {
