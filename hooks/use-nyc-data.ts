@@ -50,7 +50,7 @@ export function useNYCData(filters: FilterState) {
         promises.push(Promise.resolve(getMockWaterQualityData()))
 
         // Conditionally fetch other data based on overlays
-        if (filters.overlays.foodDeserts || filters.overlays.foodZones) {
+        if (filters.overlays?.foodDeserts || filters.overlays?.foodZones) {
           promises.push(
             fetchFoodAccessData(filters).catch((err) => {
               console.error("Food access data error:", err)
@@ -61,7 +61,7 @@ export function useNYCData(filters: FilterState) {
           promises.push(Promise.resolve([]))
         }
 
-        if (filters.overlays.greenSpace) {
+        if (filters.overlays?.greenSpace) {
           promises.push(
             fetchGreenSpaceData(filters).catch((err) => {
               console.error("Green space data error:", err)
@@ -72,7 +72,7 @@ export function useNYCData(filters: FilterState) {
           promises.push(Promise.resolve([]))
         }
 
-        if (filters.overlays.snapAccess) {
+        if (filters.overlays?.snapAccess) {
           promises.push(
             fetchSNAPData(filters).catch((err) => {
               console.error("SNAP data error:", err)
@@ -84,7 +84,7 @@ export function useNYCData(filters: FilterState) {
         }
 
         // Healthcare Access Data
-        if (filters.overlays.healthcareAccess) {
+        if (filters.overlays?.healthcareAccess) {
           promises.push(
             fetchHealthcareAccessData(filters).catch((err) => {
               console.error("Healthcare access data error:", err)
@@ -96,7 +96,7 @@ export function useNYCData(filters: FilterState) {
         }
 
         // Transit Access Data
-        if (filters.overlays.transitAccess) {
+        if (filters.overlays?.transitAccess) {
           promises.push(
             fetchTransitAccessData(filters).catch((err) => {
               console.error("Transit access data error:", err)
@@ -185,12 +185,14 @@ async function fetchHealthData(filters: FilterState) {
     const whereConditions = []
     whereConditions.push(`year >= '2020'`)
 
-    if (filters.healthCondition && filters.healthCondition !== "allConditions") {
-      whereConditions.push(`leading_cause='${encodeURIComponent(filters.healthCondition)}'`)
+    if (filters.healthConditions && filters.healthConditions.length > 0) {
+      const causeList = filters.healthConditions.map((c) => `'${encodeURIComponent(c)}'`).join(",")
+      whereConditions.push(`leading_cause in(${causeList})`)
     }
 
-    if (filters.raceEthnicity && filters.raceEthnicity !== "allGroups") {
-      whereConditions.push(`race_ethnicity='${encodeURIComponent(filters.raceEthnicity)}'`)
+    if (filters.raceEthnicities && filters.raceEthnicities.length > 0) {
+      const raceList = filters.raceEthnicities.map((r) => `'${encodeURIComponent(r)}'`).join(",")
+      whereConditions.push(`race_ethnicity in(${raceList})`)
     }
 
     if (whereConditions.length > 0) {

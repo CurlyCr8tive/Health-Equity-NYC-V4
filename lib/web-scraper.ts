@@ -1,11 +1,33 @@
 /// lib/web-scraper.ts
 
+// NOTE: the `endpoints` maps below are intentionally left empty. This scraping
+// subsystem (app/api/scraping/*) is not currently wired into any page or
+// component - populating them requires verifying real CDC/NYC Socrata
+// dataset resource IDs, which we don't want to guess at.
+export type CDCEndpoint = "chronic_disease" | "mortality" | "environmental_health" | "social_determinants"
+export type NYCEndpoint =
+  | "health_outcomes"
+  | "air_quality"
+  | "water_quality"
+  | "food_establishments"
+  | "parks"
+  | "snap_retailers"
+  | "healthcare_facilities"
+  | "subway_stations"
+
 export const DATA_SOURCES = {
   CDC: {
     name: "Centers for Disease Control and Prevention",
     url: "https://www.cdc.gov",
+    baseUrl: "https://www.cdc.gov",
     description: "National health condition data",
     reliability: "High",
+    endpoints: {
+      chronic_disease: "",
+      mortality: "",
+      environmental_health: "",
+      social_determinants: "",
+    } as Record<CDCEndpoint, string>,
   },
   EpiQuery: {
     name: "NYC DOHMH EpiQuery",
@@ -16,8 +38,19 @@ export const DATA_SOURCES = {
   NYCOpenData: {
     name: "NYC Open Data Portal",
     url: "https://opendata.cityofnewyork.us",
+    baseUrl: "https://data.cityofnewyork.us",
     description: "Environmental and demographic data for NYC",
     reliability: "Medium",
+    endpoints: {
+      health_outcomes: "",
+      air_quality: "",
+      water_quality: "",
+      food_establishments: "",
+      parks: "",
+      snap_retailers: "",
+      healthcare_facilities: "",
+      subway_stations: "",
+    } as Record<NYCEndpoint, string>,
   },
   EnvironmentalProtectionAgency: {
     name: "Environmental Protection Agency",
@@ -28,9 +61,31 @@ export const DATA_SOURCES = {
 }
 
 export class WebScraper {
+  private static instance: WebScraper | null = null
   private rateLimits: { [key: string]: { lastCalled: number; delay: number } } = {}
 
   constructor() {}
+
+  static getInstance(): WebScraper {
+    if (!WebScraper.instance) {
+      WebScraper.instance = new WebScraper()
+    }
+    return WebScraper.instance
+  }
+
+  // Remaps raw records onto a normalized shape using a { targetKey: sourceKey } field map
+  normalizeData<T extends Record<string, any> = Record<string, any>>(
+    rawData: any[],
+    fieldMap: Record<string, string>,
+  ): T[] {
+    return rawData.map((item) => {
+      const normalized: Record<string, any> = {}
+      for (const [targetKey, sourceKey] of Object.entries(fieldMap)) {
+        normalized[targetKey] = item?.[sourceKey]
+      }
+      return normalized as T
+    })
+  }
 
   // Generic fetch with retry logic
   async fetchWithRetry(url: string, options: RequestInit = {}, maxRetries = 3): Promise<Response> {

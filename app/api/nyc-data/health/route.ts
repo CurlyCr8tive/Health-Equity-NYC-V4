@@ -80,7 +80,7 @@ const generateMockHealthData = () => {
   const ageGroups = ["0-17", "18-34", "35-64", "65+"]
   const raceEthnicities = ["White", "Black", "Hispanic", "Asian", "Other"]
 
-  const data = []
+  const data: any[] = []
   let id = 1
 
   // Generate data ONLY for the 5 official NYC boroughs
@@ -157,7 +157,7 @@ function generateNYCZipCode(borough: NYCBorough): string {
 
 // Retry mechanism for NYC Health API with borough filtering
 async function fetchNYCHealthData(logger: HealthAPILogger): Promise<any> {
-  const strategies = [
+  const strategies: { name: string; url: string; headers: Record<string, string> }[] = [
     {
       name: "Primary API with App Token",
       url: "https://data.cityofnewyork.us/resource/cw4k-4w9k.json?$limit=1000",

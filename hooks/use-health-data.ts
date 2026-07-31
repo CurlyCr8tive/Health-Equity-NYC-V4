@@ -15,17 +15,17 @@ export function useHealthData(filters: FilterState) {
 
       try {
         const params = new URLSearchParams()
-        if (filters.healthCondition && filters.healthCondition !== "allConditions") {
-          params.append("condition", filters.healthCondition)
+        if (filters.healthConditions && filters.healthConditions.length > 0) {
+          params.append("condition", filters.healthConditions.join(","))
         }
         if (filters.borough && filters.borough !== "allBoroughs") {
           params.append("borough", filters.borough)
         }
-        if (filters.ageGroup && filters.ageGroup !== "allAges") {
-          params.append("ageGroup", filters.ageGroup)
+        if (filters.ageGroups && filters.ageGroups.length > 0) {
+          params.append("ageGroup", filters.ageGroups.join(","))
         }
-        if (filters.raceEthnicity && filters.raceEthnicity !== "allGroups") {
-          params.append("raceEthnicity", filters.raceEthnicity)
+        if (filters.raceEthnicities && filters.raceEthnicities.length > 0) {
+          params.append("raceEthnicity", filters.raceEthnicities.join(","))
         }
 
         const response = await fetch(`/api/nyc-health?${params}`)

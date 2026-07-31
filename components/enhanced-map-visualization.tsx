@@ -15,11 +15,11 @@ const ensurePanePos = (mapInst: any) => {
 
 // Official NYC boroughs with precise coordinates
 const NYC_BOROUGHS: BoroughData[] = [
-  { name: "Manhattan", population: 1694251, coordinates: [40.7831, -73.9712] },
-  { name: "Brooklyn", population: 2736074, coordinates: [40.6782, -73.9442] },
-  { name: "Queens", population: 2405464, coordinates: [40.7282, -73.7949] },
-  { name: "Bronx", population: 1472654, coordinates: [40.8448, -73.8648] },
-  { name: "Staten Island", population: 495747, coordinates: [40.5795, -74.1502] },
+  { name: "Manhattan", population: 1694251, coordinates: [40.7831, -73.9712], rate: 0 },
+  { name: "Brooklyn", population: 2736074, coordinates: [40.6782, -73.9442], rate: 0 },
+  { name: "Queens", population: 2405464, coordinates: [40.7282, -73.7949], rate: 0 },
+  { name: "Bronx", population: 1472654, coordinates: [40.8448, -73.8648], rate: 0 },
+  { name: "Staten Island", population: 495747, coordinates: [40.5795, -74.1502], rate: 0 },
 ]
 
 interface EnhancedMapVisualizationProps {

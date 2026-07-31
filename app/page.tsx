@@ -682,8 +682,8 @@ export default function HealthEquityDashboard() {
     let count = 0
     if (filters.healthConditions?.length > 0) count += filters.healthConditions.length
     if (filters.borough && filters.borough !== "allBoroughs") count += 1
-    if (filters.ageGroups?.length > 0) count += filters.ageGroups.length
-    if (filters.raceEthnicities?.length > 0) count += filters.raceEthnicities.length
+    if (filters.ageGroups && filters.ageGroups.length > 0) count += filters.ageGroups.length
+    if (filters.raceEthnicities && filters.raceEthnicities.length > 0) count += filters.raceEthnicities.length
     if (Array.isArray(filters.environmentalFactors)) {
       count += filters.environmentalFactors.length
     }

@@ -7,9 +7,9 @@ export async function GET(request: NextRequest) {
   // Extract query parameters
   const limit = searchParams.get("limit") || "1000"
   const state = searchParams.get("state") || "New York"
-  const condition = searchParams.get("condition")
+  const condition = searchParams.get("condition") ?? undefined
   const year = searchParams.get("year")
-  const borough = searchParams.get("borough")
+  const borough = searchParams.get("borough") ?? undefined
 
   try {
     console.log("Fetching CDC health data...")

@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import type { AuthUser } from "@/types"
 
 // Navigation items
 const navigationItems = [
@@ -79,7 +80,7 @@ const toolsItems = [
 ]
 
 export function AppSidebar() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const router = useRouter()
   const pathname = usePathname()
 

@@ -24,10 +24,10 @@ interface AISummaryProps {
   data: any[]
   filters: any
   environmentalData: any[]
-  comprehensiveData: any
-  onAnalysisComplete: (data: any) => void
-  onExportData: () => void
-  onShareDialog: () => void
+  comprehensiveData?: any
+  onAnalysisComplete?: (data: any) => void
+  onExportData?: () => void
+  onShareDialog?: () => void
 }
 
 export default function AISummary({

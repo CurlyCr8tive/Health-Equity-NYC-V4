@@ -1,11 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { HealthData, EnvironmentalData } from "@/types"
+import type { HealthData } from "@/types"
+
+// Map marker-style environmental data point, distinct from the aggregate `EnvironmentalData`
+// shape in "@/types" used by the homepage (app/page.tsx).
+export interface EnvironmentalDataPoint {
+  id: string
+  type: "airQuality" | "snapAccess" | "greenSpace"
+  name: string
+  borough: string
+  coordinates: [number, number]
+  severity: number
+  status: string
+  lastUpdated: string
+}
 
 interface NYCHealthDataResponse {
   health: HealthData[]
-  environmental: EnvironmentalData[]
+  environmental: EnvironmentalDataPoint[]
   lastUpdated: string
 }
 
@@ -111,9 +124,9 @@ function generateMockHealthData(): HealthData[] {
   return mockData
 }
 
-function generateMockEnvironmentalData(): EnvironmentalData[] {
+function generateMockEnvironmentalData(): EnvironmentalDataPoint[] {
   const boroughs = ["Manhattan", "Brooklyn", "Queens", "Bronx", "Staten Island"]
-  const environmentalData: EnvironmentalData[] = []
+  const environmentalData: EnvironmentalDataPoint[] = []
 
   // Generate environmental data points
   boroughs.forEach((borough) => {

@@ -359,7 +359,7 @@ export default function ProfilePage() {
                     properly formatted for accurate analysis.
                   </p>
                 </div>
-                <CSVUpload onUploadComplete={handleCSVUploadComplete} />
+                <CSVUpload onUploadComplete={handleCSVUploadComplete} onClose={() => setActiveTab("reports")} />
               </CardContent>
             </Card>
           </TabsContent>

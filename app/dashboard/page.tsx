@@ -27,14 +27,30 @@ import HealthEducation from "@/components/health-education"
 import EnvironmentalEducation from "@/components/environmental-education"
 import TopConditionsVisualization from "@/components/top-conditions-visualization"
 import { useNYCHealthData } from "@/hooks/use-nyc-health-data"
-import type { HealthData } from "@/types"
+import type { HealthData, FilterState, AuthUser } from "@/types"
 
 export default function DashboardPage() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
-  const [authError, setAuthError] = useState(null)
-  const [filters, setFilters] = useState({
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [filters, setFilters] = useState<FilterState>({
     healthConditions: [],
+    demographics: {
+      ageGroups: [],
+      ethnicities: [],
+      incomeRanges: [],
+    },
+    environmental: {
+      airQuality: true,
+      greenSpace: false,
+      foodAccess: false,
+      transitAccess: false,
+      housingQuality: false,
+    },
+    geographic: {
+      boroughs: [],
+      neighborhoods: [],
+    },
     borough: "",
     zipCode: "",
     neighborhood: "",
@@ -128,9 +144,11 @@ export default function DashboardPage() {
   const summaryStats = {
     healthConditions: nycData?.health ? [...new Set(nycData.health.map((item) => item.condition))].length : 0,
     boroughs: 5, // NYC has 5 boroughs
-    greenSpaces: nycData?.environmental ? nycData.environmental.filter((item) => item.type === "park").length : 0,
+    greenSpaces: nycData?.environmental
+      ? nycData.environmental.filter((item) => item.type === "greenSpace").length
+      : 0,
     foodAccess: nycData?.environmental
-      ? nycData.environmental.filter((item) => item.type === "grocery" || item.type === "snap").length
+      ? nycData.environmental.filter((item) => item.type === "snapAccess").length
       : 0,
   }
 
@@ -343,7 +361,7 @@ export default function DashboardPage() {
                         filters={filters}
                         data={filteredData}
                         environmentalData={nycData?.environmental || []}
-                        isLoading={isLoading}
+                        loading={isLoading}
                       />
                     </CardContent>
                   </Card>
@@ -366,7 +384,6 @@ export default function DashboardPage() {
                         data={filteredData}
                         filters={filters}
                         environmentalData={nycData?.environmental || []}
-                        nycData={nycData}
                       />
                     </CardContent>
                   </Card>
@@ -385,7 +402,7 @@ export default function DashboardPage() {
                       </p>
                     </CardHeader>
                     <CardContent>
-                      <ChartPanel data={filteredData} filters={filters} isLoading={isLoading} />
+                      <ChartPanel data={filteredData} filters={filters} />
                     </CardContent>
                   </Card>
                 </section>

@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
   try {
     console.log(`Scraping NYC Open Data: ${endpoint}`)
 
-    const baseUrl = DATA_SOURCES.NYC_OPEN_DATA.baseUrl
-    const endpointPath = DATA_SOURCES.NYC_OPEN_DATA.endpoints[endpoint]
+    const baseUrl = DATA_SOURCES.NYCOpenData.baseUrl
+    const endpointPath = DATA_SOURCES.NYCOpenData.endpoints[endpoint]
 
     // Build comprehensive query parameters
     const params = new URLSearchParams({
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     const url = `${baseUrl}${endpointPath}?${params.toString()}`
 
-    const rawData = await scraper.fetchWithRetry(
+    const response = await scraper.fetchWithRetry(
       url,
       {
         headers: {
@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
         },
       },
       3,
-      30,
-    ) // Cache for 30 minutes
+    )
+    const rawData = await response.json()
 
     // Transform NYC data to our format
     const transformedData = transformNYCData(rawData, endpoint)
@@ -300,7 +300,7 @@ function calculateDataFreshness(data: any[]): any {
       }
       return null
     })
-    .filter(Boolean)
+    .filter((d): d is Date => d !== null)
     .sort((a, b) => b.getTime() - a.getTime())
 
   if (!dates.length) return null

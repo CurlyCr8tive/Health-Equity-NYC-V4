@@ -42,10 +42,10 @@ export async function POST(request: NextRequest) {
 You are a public health expert analyzing community health data for New York City. 
 
 Health Conditions Data:
-${healthConditions.map((h) => `- ${h.condition}: ${h.rate}% in ${h.borough} (${h.cases?.toLocaleString()} cases)`).join("\n")}
+${healthConditions.map((h: any) => `- ${h.condition}: ${h.rate}% in ${h.borough} (${h.cases?.toLocaleString()} cases)`).join("\n")}
 
 Environmental Factors:
-${envFactors.map((e) => `- ${e.factor}: ${e.value} in ${e.borough} (${e.impact} impact)`).join("\n")}
+${envFactors.map((e: any) => `- ${e.factor}: ${e.value} in ${e.borough} (${e.impact} impact)`).join("\n")}
 
 Provide a comprehensive analysis in JSON format with:
 1. A clear summary in plain language for community members
@@ -105,7 +105,7 @@ Return only valid JSON with this structure:
           model: openai("gpt-4o"),
           prompt: analysisPrompt,
           temperature: 0.7,
-          maxTokens: 2000,
+          maxOutputTokens: 2000,
         })
 
         // Parse AI response
@@ -379,7 +379,7 @@ async function generateGeminiAnalysis(data: any, googleProvider: any) {
     const { text } = await generateText({
       model: googleProvider("gemini-1.5-flash"),
       prompt: analysisPrompt,
-      maxTokens: 4000,
+      maxOutputTokens: 4000,
       temperature: 0.7,
     })
 
@@ -585,7 +585,7 @@ function generateComprehensiveLocalAnalysis(data: any) {
     analysis += `**Federal Health Trends Identified:**
 ${cdcData
   .map(
-    (item, index) =>
+    (item: any, index: number) =>
       `${index + 1}. **${item.condition}**: ${item.rate}% prevalence among ${item.population} (${item.year} CDC data)`,
   )
   .join("\n")}
@@ -611,7 +611,7 @@ ${cdcData
     analysis += `**Community-Level Health Indicators:**
 ${epiQueryData
   .map(
-    (item, index) =>
+    (item: any, index: number) =>
       `${index + 1}. **${item.indicator}**: Score ${item.value} in ${item.neighborhood} (${item.category})`,
   )
   .join("\n")}
@@ -637,7 +637,7 @@ ${epiQueryData
     analysis += `**Municipal Health Infrastructure:**
 ${nycOpenData
   .map(
-    (item, index) =>
+    (item: any, index: number) =>
       `${index + 1}. **${item.facility_type}**: ${item.count} facilities in ${item.borough} (${item.category})`,
   )
   .join("\n")}

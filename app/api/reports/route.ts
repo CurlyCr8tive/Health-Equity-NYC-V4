@@ -145,7 +145,9 @@ function validateFilters(filters: any): ReportRequest["filters"] {
         : undefined,
     environmental:
       filters.environmental && typeof filters.environmental === "object"
-        ? Object.fromEntries(Object.entries(filters.environmental).filter(([_, value]) => typeof value === "boolean"))
+        ? (Object.fromEntries(
+            Object.entries(filters.environmental).filter(([_, value]) => typeof value === "boolean"),
+          ) as Record<string, boolean>)
         : undefined,
   }
 }
@@ -344,7 +346,7 @@ export async function POST(request: NextRequest) {
       const { text } = await generateText({
         model: openai("gpt-4o"),
         prompt,
-        maxTokens: 2000,
+        maxOutputTokens: 2000,
         temperature: 0.7,
         abortSignal: controller.signal,
       })
